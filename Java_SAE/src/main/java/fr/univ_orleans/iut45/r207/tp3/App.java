@@ -35,7 +35,5 @@ public class App {
 		for (DefaultEdge e : graph.edgeSet()) {
 			System.out.println("edge: " + e);
 		}
-		
 	}
-	
 }
