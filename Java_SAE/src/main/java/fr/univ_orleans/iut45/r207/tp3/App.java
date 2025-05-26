@@ -5,16 +5,18 @@ import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.builder.GraphTypeBuilder;
 import org.jgrapht.util.SupplierUtil;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.io.FileReader;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Hello JGraphT!
  */
 public class App {
-
-	public static Set<String> CollaborateursEnCommuns(Graph<String, DefaultEdge> g, String sommet){
-		
-		return null;
-	}
 	
 	public static void main(String[] args) {
 		
@@ -42,4 +44,5 @@ public class App {
 			System.out.println("edge: " + e);
 		}
 	}
+	
 }
