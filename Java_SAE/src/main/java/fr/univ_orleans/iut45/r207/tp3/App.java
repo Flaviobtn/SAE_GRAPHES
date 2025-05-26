@@ -1,5 +1,6 @@
 package fr.univ_orleans.iut45.r207.tp3;
 
+import java.util.*;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.builder.GraphTypeBuilder;
@@ -9,6 +10,11 @@ import org.jgrapht.util.SupplierUtil;
  * Hello JGraphT!
  */
 public class App {
+
+	public static Set<String> CollaborateursEnCommuns(Graph<String, DefaultEdge> g, String sommet){
+		
+		return null;
+	}
 	
 	public static void main(String[] args) {
 		
