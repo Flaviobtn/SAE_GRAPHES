@@ -19,7 +19,6 @@ import java.util.*;
 import java.io.*;
 
 public class App {
-
     public static Graph<String, DefaultEdge> chargerGraphe(String cheminFichier) {
         Graph<String, DefaultEdge> graphe = new DefaultUndirectedGraph<>(DefaultEdge.class);
         Gson gson = new Gson();
@@ -83,7 +82,7 @@ public class App {
 
 	public static void main(String[] args) {
 
-        Graph<String, DefaultEdge> graphe = chargerGraphe("data/movies.json");
+        Graph<String, DefaultEdge> graphe = chargerGraphe("C:/Users/tagsm/Desktop/Bureau/SAE_GRAPHES/jeux de données réduits-20250519/data_100.txt");
 
         System.out.println("Nombre d’acteurs : " + graphe.vertexSet().size());
         System.out.println("Nombre de collaborations : " + graphe.edgeSet().size());
