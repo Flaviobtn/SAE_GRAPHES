@@ -5,11 +5,9 @@ import java.util.*;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.builder.GraphTypeBuilder;
 import org.jgrapht.util.SupplierUtil;
-import java.io.FileReader;
-import java.io.IOException;
+
 import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Map;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.jgrapht.Graph;
@@ -22,39 +20,35 @@ public class App {
     public static Graph<String, DefaultEdge> chargerGraphe(String cheminFichier) {
         Graph<String, DefaultEdge> graphe = new DefaultUndirectedGraph<>(DefaultEdge.class);
         Gson gson = new Gson();
-
-        try {
-            FileReader lecteur = new FileReader(cheminFichier);
-
-            // On suppose que chaque film est un objet avec une clé "cast" qui contient une liste d’acteurs
-            List<Map<String, List<String>>> films = gson.fromJson(
-                lecteur,
-                new TypeToken<List<Map<String, List<String>>>>() {}.getType()
-            );
-
-            for (Map<String, List<String>> film : films) {
-                List<String> acteurs = film.get("cast"); // On récupère la liste des acteurs
-
-                // On ajoute tous les acteurs comme sommets
-                for (String acteur : acteurs) {
-                    graphe.addVertex(acteur);
-                }
-
-                // On relie les acteurs du même film entre eux
-                for (int i = 0; i < acteurs.size(); i++) {
-                    for (int j = i + 1; j < acteurs.size(); j++) {
-                        graphe.addEdge(acteurs.get(i), acteurs.get(j));
+        try (BufferedReader br = new BufferedReader(new FileReader(cheminFichier))) {
+            String ligne;
+            while ((ligne = br.readLine()) != null) {
+                ligne = ligne.trim();
+                if (ligne.isEmpty()) continue; 
+                try {
+                    Map<String, Object> film = gson.fromJson(ligne,new TypeToken<Map<String, Object>>() {}.getType());
+                    if (film.containsKey("cast")) {
+                        List<String> acteurs = (List<String>) film.get("cast");
+                        for (String acteur : acteurs) {
+                            graphe.addVertex(acteur);
+                        }
+                        for (int i = 0; i < acteurs.size(); i++) {
+                            for (int j = i + 1; j < acteurs.size(); j++) {
+                                graphe.addEdge(acteurs.get(i), acteurs.get(j));
+                            }
+                        }
                     }
+                } catch (Exception e) {
+                    System.err.println("Erreur JSON sur la ligne ignorée : " + ligne);
                 }
             }
-
         } catch (IOException e) {
-            System.err.println("Erreur lors de la lecture du fichier JSON.");
+            System.err.println("Erreur lors de la lecture du fichier JSON : " + e.getMessage());
         }
-
         return graphe;
     }
 
+//3.2
 	public static Set<String> collaborateursCommuns(Graph<String, DefaultEdge> g, String u, String v){
 		Set<String> res = new HashSet<>();
 		List<String> vertexU = Graphs.neighborListOf(g,u);
@@ -66,50 +60,76 @@ public class App {
 		return res;
 	}
 
-	public static Set<String> collaborateursProches(Graph<String, DefaultEdge> g, String u, int eloignement){
-        Set<String> ensembleActeurs = new HashSet<>();
-        if(eloignement == 0){
-            return ensembleActeurs;
+//3.3
+	public static Set<String> collaborateursProches(Graph<String, DefaultEdge> g, String u, int k) {
+        Set<String> visites = new HashSet<>();
+        visites.add(u);
+        return collaborateursProchesRecursive(g, u, k, visites);
+    }
+
+    private static Set<String> collaborateursProchesRecursive(Graph<String, DefaultEdge> g, String u, int k, Set<String> visites) {
+        Set<String> resultat = new HashSet<>();
+
+        if (k == 0) {
+            resultat.add(u);
+            return resultat;
         }
-        else{
-            for(String voisin:Graphs.neighborListOf(g,u)){
-                ensembleActeurs.add(voisin);
-                collaborateursProches(g,voisin,eloignement-1);
+
+        for (String voisin : Graphs.neighborListOf(g, u)) {
+            if (!visites.contains(voisin)) {
+                visites.add(voisin);
+                resultat.addAll(collaborateursProchesRecursive(g, voisin, k - 1, visites));
+                visites.remove(voisin);
             }
         }
-        return ensembleActeurs;
-	}
+        return resultat;
+    }
+
+    public static int centralite(Graph<String, DefaultEdge> g, String u) {
+        List<Integer> l = new ArrayList<>();
+        for(String sommet : g.vertexSet()){
+            l.add(App.distanceMaxDepuisSommet(g,sommet));
+        }
+        return Collections.min(l);
+    }
+
+//3.4
+    public static int distanceMaxDepuisSommet(Graph<String, DefaultEdge> g, String u) {
+        int k = 1;
+        while (true) {
+            Set<String> voisinsAK = collaborateursProches(g, u, k);
+            if (voisinsAK.isEmpty()) {
+                return k - 1;
+            }
+            k++;
+        }
+    }
+
+//3.5
+    public static int diametreGraphe(Graph<String, DefaultEdge> g) {
+        int diametre = 0;
+        for (String sommet : g.vertexSet()) {
+            int distMax = distanceMaxDepuisSommet(g, sommet);
+            if (distMax > diametre) {
+                diametre = distMax;
+            }
+        }
+        return diametre;
+    }
+
 
 	public static void main(String[] args) {
 
-        Graph<String, DefaultEdge> graphe = chargerGraphe("C:/Users/tagsm/Desktop/Bureau/SAE_GRAPHES/jeux de données réduits-20250519/data_100.txt");
-
+        Graph<String, DefaultEdge> graphe = chargerGraphe("C:/Users/tagsm/Desktop/Bureau/SAE_GRAPHES/Jeux de donnée/test_films_large.txt");
         System.out.println("Nombre d’acteurs : " + graphe.vertexSet().size());
         System.out.println("Nombre de collaborations : " + graphe.edgeSet().size());
 		
-		Graph<String, DefaultEdge> graph = GraphTypeBuilder
-				.directed()
-				.allowingMultipleEdges(true)
-				.allowingSelfLoops(true)
-				.vertexSupplier(SupplierUtil.createStringSupplier())
-				.edgeSupplier(SupplierUtil.createDefaultEdgeSupplier())
-				.buildGraph();
+        System.out.println(App.collaborateursCommuns(graphe,"[[Alice Smith]]","[[Diana Prince]]"));
+        System.out.println(App.collaborateursProches(graphe,"[[Alice Smith]]",1));
+        System.out.println(App.centralite(graphe,"[[Alice Smith]]"));
+        System.out.println(App.distanceMaxDepuisSommet(graphe,"[[Jack Black]]"));
+        System.out.println(App.diametreGraphe(graphe));
 
-		String v0 = graph.addVertex();
-		String v1 = graph.addVertex();
-		String v2 = graph.addVertex();
-
-		graph.addEdge(v0, v1);
-		graph.addEdge(v1, v2);
-		graph.addEdge(v0, v2);
-
-		for (String v : graph.vertexSet()) {
-			System.out.println("vertex: " + v);
-		}
-
-		for (DefaultEdge e : graph.edgeSet()) {
-			System.out.println("edge: " + e);
-		}
 	}
 	
 }
