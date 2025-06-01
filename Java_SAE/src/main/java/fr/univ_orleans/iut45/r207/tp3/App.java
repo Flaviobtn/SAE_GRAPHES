@@ -18,35 +18,39 @@ import java.io.*;
 
 public class App {
     public static Graph<String, DefaultEdge> chargerGraphe(String cheminFichier) {
-        Graph<String, DefaultEdge> graphe = new DefaultUndirectedGraph<>(DefaultEdge.class);
-        Gson gson = new Gson();
-        try (BufferedReader br = new BufferedReader(new FileReader(cheminFichier))) {
-            String ligne;
-            while ((ligne = br.readLine()) != null) {
-                ligne = ligne.trim();
-                if (ligne.isEmpty()) continue; 
-                try {
-                    Map<String, Object> film = gson.fromJson(ligne,new TypeToken<Map<String, Object>>() {}.getType());
-                    if (film.containsKey("cast")) {
-                        List<String> acteurs = (List<String>) film.get("cast");
-                        for (String acteur : acteurs) {
-                            graphe.addVertex(acteur);
-                        }
-                        for (int i = 0; i < acteurs.size(); i++) {
-                            for (int j = i + 1; j < acteurs.size(); j++) {
-                                graphe.addEdge(acteurs.get(i), acteurs.get(j));
-                            }
+    Graph<String, DefaultEdge> graphe = new DefaultUndirectedGraph<>(DefaultEdge.class);
+    Gson gson = new Gson();
+    try (BufferedReader br = new BufferedReader(new FileReader(cheminFichier))) {
+        String ligne;
+        while ((ligne = br.readLine()) != null) {
+            ligne = ligne.trim();
+            if (ligne.isEmpty()) continue; 
+            try {
+                Map<String, Object> film = gson.fromJson(ligne, new TypeToken<Map<String, Object>>() {}.getType());
+                if (film.containsKey("cast")) {
+                    List<String> acteursBruts = (List<String>) film.get("cast");
+                    List<String> acteurs = new ArrayList<>();
+                    for (String acteurBrut : acteursBruts) {
+                        // Supprime les crochets [[...]] s'ils existent
+                        String acteur = acteurBrut.replaceAll("^\\[\\[(.*)\\]\\]$", "$1");
+                        graphe.addVertex(acteur);
+                        acteurs.add(acteur);
+                    }
+                    for (int i = 0; i < acteurs.size(); i++) {
+                        for (int j = i + 1; j < acteurs.size(); j++) {
+                            graphe.addEdge(acteurs.get(i), acteurs.get(j));
                         }
                     }
-                } catch (Exception e) {
-                    System.err.println("Erreur JSON sur la ligne ignorée : " + ligne);
                 }
+            } catch (Exception e) {
+                System.err.println("Erreur JSON sur la ligne ignorée : " + ligne);
             }
-        } catch (IOException e) {
-            System.err.println("Erreur lors de la lecture du fichier JSON : " + e.getMessage());
         }
-        return graphe;
+    } catch (IOException e) {
+        System.err.println("Erreur lors de la lecture du fichier JSON : " + e.getMessage());
     }
+    return graphe;
+}
 
 //3.2
 	public static Set<String> collaborateursCommuns(Graph<String, DefaultEdge> g, String u, String v){
@@ -123,11 +127,11 @@ public class App {
         Graph<String, DefaultEdge> graphe = chargerGraphe("C:/Users/tagsm/Desktop/Bureau/SAE_GRAPHES/Jeux de donnée/test_films_large.txt");
         System.out.println("Nombre d’acteurs : " + graphe.vertexSet().size());
         System.out.println("Nombre de collaborations : " + graphe.edgeSet().size());
-		
-        System.out.println(App.collaborateursCommuns(graphe,"[[Alice Smith]]","[[Diana Prince]]"));
-        System.out.println(App.collaborateursProches(graphe,"[[Alice Smith]]",1));
-        System.out.println(App.centralite(graphe,"[[Alice Smith]]"));
-        System.out.println(App.distanceMaxDepuisSommet(graphe,"[[Jack Black]]"));
+		System.out.println(graphe);
+        System.out.println(App.collaborateursCommuns(graphe,"Alice Smith","Diana Prince"));
+        System.out.println(App.collaborateursProches(graphe,"Alice Smith",1));
+        System.out.println(App.centralite(graphe,"Alice Smith"));
+        System.out.println(App.distanceMaxDepuisSommet(graphe,"Jack Black"));
         System.out.println(App.diametreGraphe(graphe));
 
 	}
