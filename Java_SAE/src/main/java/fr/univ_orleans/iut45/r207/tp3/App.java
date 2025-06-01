@@ -65,7 +65,7 @@ public class App {
 	}
 
 //3.3
-	public static Set<String> collaborateursProches(Graph<String, DefaultEdge> g, String u, int k) {
+	/*public static Set<String> collaborateursProches(Graph<String, DefaultEdge> g, String u, int k) {
         Set<String> visites = new HashSet<>();
         visites.add(u);
         return collaborateursProchesRecursive(g, u, k, visites);
@@ -87,7 +87,42 @@ public class App {
             }
         }
         return resultat;
+    }*/
+
+    public static Set<String> collaborateursProches(Graph<String, DefaultEdge> g, String u, int k) {
+        Set<String> resultat = new HashSet<>();
+        Set<String> visites = new HashSet<>();
+        ArrayList<String> file = new ArrayList<>();
+        Map<String, Integer> niveaux = new HashMap<>();
+
+        visites.add(u);
+        file.add(u);
+        niveaux.put(u, 0);
+
+        int index = 0;
+
+        while (index < file.size()) {
+            String sommet = file.get(index++);
+            int niveau = niveaux.get(sommet);
+
+            if (niveau > k) continue;
+
+            resultat.add(sommet);
+
+            if (niveau < k) {
+                for (String voisin : Graphs.neighborListOf(g, sommet)) {
+                    if (!visites.contains(voisin)) {
+                        visites.add(voisin);
+                        file.add(voisin);
+                        niveaux.put(voisin, niveau + 1);
+                    }
+                }
+            }
+        }
+
+        return resultat;
     }
+
 
     public static int centralite(Graph<String, DefaultEdge> g, String u) {
         List<Integer> l = new ArrayList<>();
