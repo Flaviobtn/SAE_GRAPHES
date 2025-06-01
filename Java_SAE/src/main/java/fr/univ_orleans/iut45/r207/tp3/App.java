@@ -92,30 +92,27 @@ public class App {
     public static Set<String> collaborateursProches(Graph<String, DefaultEdge> g, String u, int k) {
         Set<String> resultat = new HashSet<>();
         Set<String> visites = new HashSet<>();
-        ArrayList<String> file = new ArrayList<>();
         Map<String, Integer> niveaux = new HashMap<>();
+        ArrayList<String> file = new ArrayList<>();
 
         visites.add(u);
-        file.add(u);
         niveaux.put(u, 0);
+        file.add(u);
 
         int index = 0;
 
         while (index < file.size()) {
-            String sommet = file.get(index++);
-            int niveau = niveaux.get(sommet);
+            String courant = file.get(index++);
+            int niveau = niveaux.get(courant);
 
-            if (niveau > k) continue;
+            if (niveau >= k) continue;
 
-            resultat.add(sommet);
-
-            if (niveau < k) {
-                for (String voisin : Graphs.neighborListOf(g, sommet)) {
-                    if (!visites.contains(voisin)) {
-                        visites.add(voisin);
-                        file.add(voisin);
-                        niveaux.put(voisin, niveau + 1);
-                    }
+            for (String voisin : Graphs.neighborListOf(g, courant)) {
+                if (!visites.contains(voisin)) {
+                    visites.add(voisin);
+                    niveaux.put(voisin, niveau + 1);
+                    file.add(voisin);
+                    resultat.add(voisin);
                 }
             }
         }
