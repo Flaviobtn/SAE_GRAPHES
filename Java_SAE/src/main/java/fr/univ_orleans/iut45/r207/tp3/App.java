@@ -65,30 +65,6 @@ public class App {
 	}
 
 //3.3
-	/*public static Set<String> collaborateursProches(Graph<String, DefaultEdge> g, String u, int k) {
-        Set<String> visites = new HashSet<>();
-        visites.add(u);
-        return collaborateursProchesRecursive(g, u, k, visites);
-    }
-
-    private static Set<String> collaborateursProchesRecursive(Graph<String, DefaultEdge> g, String u, int k, Set<String> visites) {
-        Set<String> resultat = new HashSet<>();
-
-        if (k == 0) {
-            resultat.add(u);
-            return resultat;
-        }
-
-        for (String voisin : Graphs.neighborListOf(g, u)) {
-            if (!visites.contains(voisin)) {
-                visites.add(voisin);
-                resultat.addAll(collaborateursProchesRecursive(g, voisin, k - 1, visites));
-                visites.remove(voisin);
-            }
-        }
-        return resultat;
-    }*/
-
     public static Set<String> collaborateursProches(Graph<String, DefaultEdge> g, String u, int k) {
         Set<String> resultat = new HashSet<>();
         Set<String> visites = new HashSet<>();
@@ -98,15 +74,12 @@ public class App {
         visites.add(u);
         niveaux.put(u, 0);
         file.add(u);
-
         int index = 0;
-
+        
         while (index < file.size()) {
             String courant = file.get(index++);
             int niveau = niveaux.get(courant);
-
             if (niveau >= k) continue;
-
             for (String voisin : Graphs.neighborListOf(g, courant)) {
                 if (!visites.contains(voisin)) {
                     visites.add(voisin);
@@ -121,16 +94,43 @@ public class App {
     }
 
 
-    public static int centralite(Graph<String, DefaultEdge> g, String u) {
+    /*public static int centralite(Graph<String, DefaultEdge> g, String u) {
         List<Integer> l = new ArrayList<>();
         for(String sommet : g.vertexSet()){
             l.add(App.distanceMaxDepuisSommet(g,sommet));
         }
         return Collections.min(l);
+    }*/
+    public static int centralite(Graph<String, DefaultEdge> g, String u) {
+        Set<String> visites = new HashSet<>();
+        Map<String, Integer> distance = new HashMap<>();
+        ArrayList<String> file = new ArrayList<>();
+
+        visites.add(u);
+        distance.put(u, 0);
+        file.add(u);
+
+        int index = 0;
+        int max = 0;
+
+        while (index < file.size()) {
+            String courant = file.get(index++);
+            int d = distance.get(courant);
+            max = Math.max(max, d);
+
+            for (String voisin : Graphs.neighborListOf(g, courant)) {
+                if (!visites.contains(voisin)) {
+                    visites.add(voisin);
+                    distance.put(voisin, d + 1);
+                    file.add(voisin);
+                }
+            }
+        }
+        return max;
     }
 
 //3.4
-    public static int distanceMaxDepuisSommet(Graph<String, DefaultEdge> g, String u) {
+    /*public static int distanceMaxDepuisSommet(Graph<String, DefaultEdge> g, String u) {
         int k = 1;
         while (true) {
             Set<String> voisinsAK = collaborateursProches(g, u, k);
@@ -139,10 +139,36 @@ public class App {
             }
             k++;
         }
+    }*/
+
+   public static int distanceMaxDepuisSommet(Graph<String, DefaultEdge> g, String u) {
+    Set<String> visites = new HashSet<>();
+    Map<String, Integer> distance = new HashMap<>();
+    ArrayList<String> file = new ArrayList<>();
+
+    visites.add(u);
+    distance.put(u, 0);
+    file.add(u);
+    int index = 0;
+    int max = 0;
+
+    while (index < file.size()) {
+        String courant = file.get(index++);
+        int d = distance.get(courant);
+        max = Math.max(max, d);
+        for (String voisin : Graphs.neighborListOf(g, courant)) {
+            if (!visites.contains(voisin)) {
+                visites.add(voisin);
+                distance.put(voisin, d + 1);
+                file.add(voisin);
+            }
+        }
+    }
+        return max;
     }
 
 //3.5
-    public static int diametreGraphe(Graph<String, DefaultEdge> g) {
+    /*public static int diametreGraphe(Graph<String, DefaultEdge> g) {
         int diametre = 0;
         for (String sommet : g.vertexSet()) {
             int distMax = distanceMaxDepuisSommet(g, sommet);
@@ -151,20 +177,28 @@ public class App {
             }
         }
         return diametre;
+    }*/
+
+    public static int diametreGraphe(Graph<String, DefaultEdge> g) {
+        int diametre = 0;
+        for (String sommet : g.vertexSet()) {
+            int distMax = distanceMaxDepuisSommet(g, sommet);
+            diametre = Math.max(diametre, distMax);
+        }
+        return diametre;
     }
+
 
 
 	public static void main(String[] args) {
 
-        Graph<String, DefaultEdge> graphe = chargerGraphe("C:/Users/tagsm/Desktop/Bureau/SAE_GRAPHES/Jeux de donnée/test_films_large.txt");
+        Graph<String, DefaultEdge> graphe = chargerGraphe("C:/Users/tagsm/Desktop/Bureau/SAE_GRAPHES/Jeux de donnée/data_100.txt");
         System.out.println("Nombre d’acteurs : " + graphe.vertexSet().size());
         System.out.println("Nombre de collaborations : " + graphe.edgeSet().size());
-        System.out.println(App.collaborateursCommuns(graphe,"Alice Smith","Diana Prince"));
-        System.out.println(App.collaborateursProches(graphe,"Alice Smith",1));
-        System.out.println(App.centralite(graphe,"Alice Smith"));
-        System.out.println(App.distanceMaxDepuisSommet(graphe,"Jack Black"));
+        System.out.println(App.collaborateursCommuns(graphe,"Adam Driver","Lady Gaga"));
+        System.out.println(App.collaborateursProches(graphe,"Lady Gaga",6));
+        System.out.println(App.centralite(graphe,"Adam Driver"));
+        System.out.println(App.distanceMaxDepuisSommet(graphe,"Adam Driver"));
         System.out.println(App.diametreGraphe(graphe));
-
-	}
-	
+	}	
 }
