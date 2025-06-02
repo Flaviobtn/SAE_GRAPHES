@@ -158,7 +158,6 @@ public class App {
         Graph<String, DefaultEdge> graphe = chargerGraphe("C:/Users/tagsm/Desktop/Bureau/SAE_GRAPHES/Jeux de donnée/test_films_large.txt");
         System.out.println("Nombre d’acteurs : " + graphe.vertexSet().size());
         System.out.println("Nombre de collaborations : " + graphe.edgeSet().size());
-		System.out.println(graphe);
         System.out.println(App.collaborateursCommuns(graphe,"Alice Smith","Diana Prince"));
         System.out.println(App.collaborateursProches(graphe,"Alice Smith",1));
         System.out.println(App.centralite(graphe,"Alice Smith"));
