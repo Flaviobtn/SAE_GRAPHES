@@ -116,7 +116,6 @@ public class App {
                 }
             }
         }
-
         return resultat;
     }
 
